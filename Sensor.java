@@ -19,6 +19,8 @@ class Sensor implements Runnable {
     private TriggerType triggerType;
     private double threshold;      // only applicable in event based sensor (in degrees)
 
+		private volatile boolean shutdown;
+
     Sensor(Physics phy, ObjectOutputStream out, TriggerType type, double threshold, double sensorSamplingPeriod_sim, double sensorSamplingPeriod_phy) {
         this.physics = phy;
         this.out = out;
@@ -29,10 +31,13 @@ class Sensor implements Runnable {
         this.threshold = threshold;
     }
 
+		void init() {
+			shutdown = false;
+		}
 
     public synchronized void run() {
 
-        while (true) {
+        while (!shutdown) {
             // Sensor will get four data from each pendulum
             // {angle, angleDot, pos, posDot}
             double sensorData[] = new double[4 * physics.NUM_POLES];
@@ -94,6 +99,10 @@ class Sensor implements Runnable {
             ioException.printStackTrace();
         }
     }
+
+		public void shutdown() {
+			shutdown = true;
+		}
 
 }
 

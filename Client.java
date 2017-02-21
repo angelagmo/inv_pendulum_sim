@@ -24,21 +24,29 @@ public class Client extends Applet {
     private static ObjectOutputStream out;
     private static ObjectInputStream in;
     Physics physics;
+		Sensor sensor;
+		Actuator actuator;
+    UpdatingUIThread animator;
+
     Socket requestSocket;
     Thread physicsThread;
     Thread sensorThread, actuatorThread;
     Thread updatingUIThread;
-    UpdatingUIThread animator;
     // frames per second for updating UI
     int fps = 10;
     // simulation time between two samples (in seconds)
     double sensorSamplingPeriod_sim = 1.0 / sensorSamplingRate;
     double sensorSamplingPeriod_phy = sensorSamplingPeriod_sim / simSpeed;
 
+		double pole_density = 0.1;
+		double pole_length = 1.0;
+
     String[] configInfo;
 
     final int APPLET_WIDTH = 800;
     final int APPLET_HEIGHT = 400;
+
+		// Button button;
 
     /**
      * This method initializes the pole state and sets up animation timing.
@@ -69,8 +77,28 @@ public class Client extends Applet {
         configInfo[1] = sb.toString();
         // -------------------------------------
 
+				// Getting pole density and pole length from user
+				pole_density = Double.parseDouble(JOptionPane.showInputDialog(this,
+							"Enter pole density:",
+							"0.1"));
+				pole_length = Double.parseDouble(JOptionPane.showInputDialog(this,
+							"Enter pole length:",
+							"1.0"));
 
-        physics = new Physics(tau_sim, tau_sim / simSpeed);
+				// Adding a button
+				/*
+				button = new Button("STOP");
+				this.add(button);
+				button.addActionListener(this);
+				*/
+
+    }
+
+    /**
+     * This method starts animating by creating a new Thread.
+     */
+    public void start() {
+
         try {
             requestSocket = new Socket("localhost", 25533);
             out = new ObjectOutputStream(requestSocket.getOutputStream());
@@ -79,31 +107,30 @@ public class Client extends Applet {
         } catch (IOException e) {
             System.out.println("Not able to bind to server");
         }
-    }
 
-    /**
-     * This method starts animating by creating a new Thread.
-     */
-    public void start() {
 
         //Start animating!
         if (physicsThread == null) {
+        		physics = new Physics(tau_sim, tau_sim / simSpeed, pole_density, pole_length);
             physicsThread = new Thread(physics);
         }
         physicsThread.start();
 
         if (sensorThread == null) {
-            sensorThread = new Thread(new Sensor(physics, out, triggerType, threshold, sensorSamplingPeriod_sim, sensorSamplingPeriod_phy));
+						sensor = new Sensor(physics, out, triggerType, threshold,
+								sensorSamplingPeriod_sim, sensorSamplingPeriod_phy);
+            sensorThread = new Thread(sensor);
         }
         sensorThread.start();
 
         if (actuatorThread == null) {
-            actuatorThread = new Thread(new Actuator(physics, in));
+						actuator = new Actuator(physics, in);
+            actuatorThread = new Thread(actuator);
         }
         actuatorThread.start();
 
-        animator = new UpdatingUIThread(this, physics, (int) (1000 / fps), configInfo);
         if (updatingUIThread == null) {
+        		animator = new UpdatingUIThread(this, physics, (int) (1000 / fps), configInfo);
             updatingUIThread = new Thread(animator);
         }
         updatingUIThread.start();
@@ -114,25 +141,25 @@ public class Client extends Applet {
      * This method stops the animating thread and gets rid of the objects necessary for double buffering.
      */
     public void stop() {
-        //Stop the animating thread.
-        physicsThread = null;
-        sensorThread = null;
-        actuatorThread = null;
+       //Stop the animating thread.
+        // physicsThread = null;
+        physics.shutdown();
+        sensor.shutdown();
+        actuator.shutdown();
+				animator.shutdown();
 
-        updatingUIThread.stop();
-
-        try {
+			 try {
             out.writeObject("bye"); // signal to close the sever
             out.flush();
 
             in.readObject();
-            in.close();
-            out.close();
+
             requestSocket.close();
+            out.close();
+            in.close();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-
 
     }
 
@@ -142,4 +169,24 @@ public class Client extends Applet {
     public void paint(Graphics gr) {
         animator.update(gr);
     }
+
+		/*
+		 * Handle button click event
+		 */
+		/*
+		public void actionPerformed(ActionEvent e) {
+			if (e.getSource() == button) {
+				if (button.getLabel().equals("STOP")) {
+					System.out.println("STOP clicked");
+					this.stop();
+					button.setLabel("START");
+				} else if (button.getLabel().equals("START")) {
+					System.out.println("START clicked");
+					this.init();
+					this.start();
+					button.setLabel("STOP");
+				}
+			}
+		}
+		*/
 }

@@ -7,6 +7,7 @@ class Actuator implements Runnable {
 
     Physics physics;
     private ObjectInputStream in;
+		private volatile boolean shutdown;
 
     Actuator(Physics phy, ObjectInputStream in) {
         this.physics = phy;
@@ -19,10 +20,12 @@ class Actuator implements Runnable {
           init_actions[i] = 0.75;
         }
         physics.update_actions(init_actions);
+
+				shutdown = false;
     }
 
     public synchronized void run() {
-        while (true) {
+        while (!shutdown) {
             try {
               // read action data from control server  
               Object obj = in.readObject();
@@ -35,4 +38,8 @@ class Actuator implements Runnable {
 
         }
     }
+
+		public void shutdown() {
+			shutdown = true;
+		}
 }

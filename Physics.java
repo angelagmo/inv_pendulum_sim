@@ -21,6 +21,8 @@ public class Physics implements Runnable {
     // Set the initial position of the poles
     public final double[] pole_init_pos = {-1.0};
 
+		private volatile boolean shutdown;
+
     public Physics(double tau_sim, double tau_phy) {
         this.tau_sim = tau_sim;
         this.tau_phy_ms = (int) (1000 * tau_phy);
@@ -29,7 +31,20 @@ public class Physics implements Runnable {
         for (int i = 0; i < NUM_POLES; i++) {
           pendulums[i] = new Pendulum(i, pole_init_pos[i]);
         }
+				shutdown = false;
     }
+
+		public Physics(double tau_sim, double tau_phy, double pole_density, double pole_length) {
+        this.tau_sim = tau_sim;
+        this.tau_phy_ms = (int) (1000 * tau_phy);
+        pendulums = new Pendulum[NUM_POLES];
+        assert(NUM_POLES == pole_init_pos.length);
+        for (int i = 0; i < NUM_POLES; i++) {
+          pendulums[i] = new Pendulum(i, pole_init_pos[i], pole_density, pole_length);
+        }
+				shutdown = false;
+    }
+
 
     // total simulation time (in seconds) elapsed since simulation started
     double get_simTime() {
@@ -69,7 +84,7 @@ public class Physics implements Runnable {
         simulationTime = 0;
 
         //This is the animation loop.
-        while (true) {
+        while (!shutdown) {
           if (pole_in_good_state) {
             for (int i = 0; i < pendulums.length; i++) {
               pole_in_good_state = update_pendulum(pendulums[i]);
@@ -185,4 +200,8 @@ public class Physics implements Runnable {
        return p.get_poleState() == PoleState.NORMAL;
     }
 
+
+		public void shutdown() {
+			shutdown = true;
+		}
 }

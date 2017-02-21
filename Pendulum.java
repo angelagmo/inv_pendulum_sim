@@ -14,21 +14,26 @@ public class Pendulum {
     public double init_pos;   // initial position
     public double pos, posDot, angle, angleDot;
     public double prevAngle, angleDDot, posDDot;
-    public double action = 0.75;
-    
-    public final double cartMass = 1.;
-    public final double poleMass = 0.1;
-    public final double poleLength = 1.;
+    public double action;
+
+    public double cartMass;
+
+		//public final double poleMass = 0.1;
+    // public final double poleLength = 1.;
+		public double poleMassDensity;
+    public double poleLength;
+
+		public double poleMass;
 
     ;
-    public final double forceMag = 30.;
-    public final double fricCart = 0.00005;
-    public final double fricPole = 0.005;
-    public final double totalMass = cartMass + poleMass;
-    public final double halfPole = 0.5 * poleLength;
+    public double forceMag;
+    public double fricCart;
+    public double fricPole;
+    public double totalMass;
+    public double halfPole;
 
     ;
-    public final double poleMassLength = halfPole * poleMass;
+    public double poleMassLength;
     public final double fourthirds = 4. / 3.;
 
     public final double cartWidth = 0.4;  // for UI and collision detecion
@@ -37,10 +42,33 @@ public class Pendulum {
     PoleState poleState = PoleState.NORMAL;
 
     public Pendulum(int id, double init_pos) {
+      this(id, init_pos, 0.1, 1.0);
+    }
+
+		public Pendulum(int id, double init_pos, double pole_density, double pole_length) {
       this.pole_id = id;
       this.init_pos = init_pos;
       this.pos = init_pos;
-    }
+
+			this.poleMassDensity = pole_density;
+			this.poleLength = pole_length;
+
+			init();
+		}
+
+		private void init() {
+			action = 0.75;
+			cartMass = 1.0;
+			poleMass = poleMassDensity * poleLength;
+
+			forceMag = 30.0;
+			fricCart = 0.00005;
+			fricPole = 0.005;
+			totalMass = cartMass + poleMass;
+			halfPole = 0.5 * poleLength;
+
+			poleMassLength = halfPole * poleMass;
+		}
 
     int get_id() {
       return pole_id;

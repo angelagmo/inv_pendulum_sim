@@ -24,6 +24,8 @@ public class UpdatingUIThread implements Runnable{
     double phy_width = 10.0;
     double phy_height = 5.0;
 
+		private volatile boolean shutdown;
+
     public UpdatingUIThread(Applet applet, Physics physics,
                             int updatingPeriod, String[] simConfigInfo){
         this.applet = applet;
@@ -32,10 +34,14 @@ public class UpdatingUIThread implements Runnable{
         this.simConfigInfo = simConfigInfo;
     }
 
+		void init() {
+			shutdown = false;
+		}
+
     public void run(){
         long startTime = System.currentTimeMillis();
 
-        while(true){
+        while(!shutdown){
             //Display it.
             applet.repaint();
 
@@ -50,6 +56,10 @@ public class UpdatingUIThread implements Runnable{
             }
         }
     }
+
+		public void shutdown() {
+			shutdown = true;
+		}
 
 
     /**
