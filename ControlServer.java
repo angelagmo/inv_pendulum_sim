@@ -163,10 +163,6 @@ class PoleServer_handler implements Runnable {
         System.out.println("PID action: " + actionPID);
         System.out.println("Curr angle: " + angle);
 
-        if (angle < 0.005 && angle > -0.005 && actionPID < 0.005 && actionPID > -0.005 ) {
-            System.out.println("BALANCED");
-            // in.writeObject("bye");
-        }
         return actionPID;
    }
     // TASK 2
@@ -177,7 +173,7 @@ class PoleServer_handler implements Runnable {
         System.out.println("PID action: " + actionPID);
         System.out.println("Curr angle: " + angle);
         System.out.println("Curr pos: " + pos);
-        
+
         return actionPID;
    }
 
