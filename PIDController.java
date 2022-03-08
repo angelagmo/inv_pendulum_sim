@@ -39,8 +39,8 @@ public class PIDController {
         double Ti = 0.5;
         double Td = 0.5;
 
-        Ki = Kp / Ti;
-        Kd = Kp * Td;
+        // Ki = Kp / Ti;
+        // Kd = Kp * Td;
 
         // calculate PID terms
         double proportional = Kp * error;

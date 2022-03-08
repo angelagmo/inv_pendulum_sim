@@ -140,7 +140,7 @@ class PoleServer_handler implements Runnable {
     public void run() {
 
         try {
-            anglePID.PID_init(0.8, 0.3, 0.2, 0.1, 0.2);
+            anglePID.PID_init(0.85, 0.85, 0.25, 0.1, 0.2);
             control_pendulum(out, in);
 
         } catch (Exception ioException) {
@@ -155,69 +155,17 @@ class PoleServer_handler implements Runnable {
     // TODO: Current implementation assumes that each pole is controlled
     // independently. The interface needs to be changed if the control of one
     // pendulum needs sensing data from other pendulums.
-    double calculate_action(double angle, double angleDot, double pos, double posDot) {
+    double calculate_action(double angle, double angleDot, double pos, double posDot) throws Exception{
         double action = 0;
-  
-        // Original code
-        if (angle > 0) {
-            if (angle > 65 * 0.01745) {
-                action = 10;
-            } else if (angle > 60 * 0.01745) {
-                action = 8;
-            } else if (angle > 50 * 0.01745) {
-                action = 7.5;
-            } else if (angle > 30 * 0.01745) {
-                action = 4;
-            } else if (angle > 20 * 0.01745) {
-                action = 2;
-            } else if (angle > 10 * 0.01745) {
-                action = 0.5;
-            } else if(angle >5*0.01745){
-                action = 0.2;
-            } else if(angle >2*0.01745){
-                action = 0.1;
-            } else {
-                action = 0;
-            }
-        } else if (angle < 0) {
-            if (angle < -65 * 0.01745) {
-                action = -10;
-            } else if (angle < -60 * 0.01745) {
-                action = -8;
-            } else if (angle < -50 * 0.01745) {
-                action = -7.5;
-            } else if (angle < -30 * 0.01745) {
-                action = -4;
-            } else if (angle < -20 * 0.01745) {
-                action = -2;
-            } else if (angle < -10 * 0.01745) {
-                action = -0.5;
-            } else if(angle <-5*0.01745){
-                action = -0.2;
-            } else if(angle <-2*0.01745){
-                action = -0.1;
-            } else {
-                action = 0;
-            }
-        } else {
-            action = 0.;
-        }
+        double actionPID = 0.075 * (angle / 0.01745) + 0.5 * angleDot + 0.01 * pos + 0.15 * posDot;
 
-        // PIDController anglePID = new PIDController();
-        double actionPID = anglePID.PID_update(angle, angleDot, 0);
-        System.out.println("Parameters(Kp, Ki, Kd, T, tau) = " + anglePID.Ki + ", " 
-                            + anglePID.Kp + ", " + anglePID.Kd + ", " 
-                            + anglePID.T + ", " + anglePID.tau);
-        System.out.println("Integrator/Differentiator status: " + anglePID.integral + ", " + anglePID.derivative);
         System.out.println("PID action: " + actionPID);
-        System.out.println("Actual action: " + action);
         System.out.println("Curr angle: " + angle);
 
-        // if (angle > 0) {
-        //     System.out.println("Reversing action");
-        //     actionPID *= -1;
-        // }
-
+        if (angle < 0.005 && angle > -0.005 && actionPID < 0.005 && actionPID > -0.005 ) {
+            System.out.println("BALANCED");
+            // in.writeObject("bye");
+        }
         return actionPID;
    }
 
