@@ -140,7 +140,7 @@ class PoleServer_handler implements Runnable {
     public void run() {
 
         try {
-            anglePID.PID_init(0.5, 0.3, 0.2, 0.1, 0.2);
+            anglePID.PID_init(0.8, 0.3, 0.2, 0.1, 0.2);
             control_pendulum(out, in);
 
         } catch (Exception ioException) {
@@ -211,6 +211,7 @@ class PoleServer_handler implements Runnable {
         System.out.println("Integrator/Differentiator status: " + anglePID.integral + ", " + anglePID.derivative);
         System.out.println("PID action: " + actionPID);
         System.out.println("Actual action: " + action);
+        System.out.println("Curr angle: " + angle);
 
         // if (angle > 0) {
         //     System.out.println("Reversing action");
