@@ -19,11 +19,18 @@ public class PIDController {
     double prevMeasurement;
 
     public void PID_init(double p, double i, double d, double time, double t) {
+        // value assignments
         Kp = p;
         Ki = i;
         Kd = d;
         T = time;
         tau = t;
+
+        // reset values
+        integral = 0;
+        prevError = 0;
+        derivative = 0;
+        prevMeasurement = 0;
     }
 
     public double PID_update(double x, double xDot, double target) {
@@ -40,7 +47,9 @@ public class PIDController {
         prevError = error;
         prevMeasurement = x;
 
-        double output = proportional + integral;
+        // todo: generate output limit based on projected distance
+        // todo: figure out how to move cart w/ no angle change
+        double output = proportional + integral + derivative;
 
         return output;
     }

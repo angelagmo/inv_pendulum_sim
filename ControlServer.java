@@ -44,6 +44,8 @@ class PoleServer_handler implements Runnable {
     static Socket clientSocket;
     Thread t;
 
+    PIDController anglePID = new PIDController();
+
     /**
      * Class Constructor
      */
@@ -138,6 +140,7 @@ class PoleServer_handler implements Runnable {
     public void run() {
 
         try {
+            anglePID.PID_init(0.5, 0.3, 0.2, 0.1, 0.2);
             control_pendulum(out, in);
 
         } catch (Exception ioException) {
@@ -200,9 +203,12 @@ class PoleServer_handler implements Runnable {
             action = 0.;
         }
 
-        PIDController anglePID = new PIDController();
-        anglePID.PID_init(0.8, 0.2, 0.3, 0.2, 0.4);
+        // PIDController anglePID = new PIDController();
         double actionPID = anglePID.PID_update(angle, angleDot, 0);
+        System.out.println("Parameters(Kp, Ki, Kd, T, tau) = " + anglePID.Ki + ", " 
+                            + anglePID.Kp + ", " + anglePID.Kd + ", " 
+                            + anglePID.T + ", " + anglePID.tau);
+        System.out.println("Integrator/Differentiator status: " + anglePID.integral + ", " + anglePID.derivative);
         System.out.println("PID action: " + actionPID);
         System.out.println("Actual action: " + action);
 
