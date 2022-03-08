@@ -153,52 +153,65 @@ class PoleServer_handler implements Runnable {
     // independently. The interface needs to be changed if the control of one
     // pendulum needs sensing data from other pendulums.
     double calculate_action(double angle, double angleDot, double pos, double posDot) {
-      double action = 0;
-       // if (angle > 0 && angleDiff < 0) {
-       if (angle > 0) {
-           if (angle > 65 * 0.01745) {
-               action = 10;
-           } else if (angle > 60 * 0.01745) {
-               action = 8;
-           } else if (angle > 50 * 0.01745) {
-               action = 7.5;
-           } else if (angle > 30 * 0.01745) {
-               action = 4;
-           } else if (angle > 20 * 0.01745) {
-               action = 2;
-           } else if (angle > 10 * 0.01745) {
-               action = 0.5;
-           } else if(angle >5*0.01745){
-               action = 0.2;
-           } else if(angle >2*0.01745){
-               action = 0.1;
-           } else {
-               action = 0;
-           }
-       } else if (angle < 0) {
-           if (angle < -65 * 0.01745) {
-               action = -10;
-           } else if (angle < -60 * 0.01745) {
-               action = -8;
-           } else if (angle < -50 * 0.01745) {
-               action = -7.5;
-           } else if (angle < -30 * 0.01745) {
-               action = -4;
-           } else if (angle < -20 * 0.01745) {
-               action = -2;
-           } else if (angle < -10 * 0.01745) {
-               action = -0.5;
-           } else if(angle <-5*0.01745){
-               action = -0.2;
-           } else if(angle <-2*0.01745){
-               action = -0.1;
-           } else {
-               action = 0;
-           }
-       } else {
-           action = 0.;
-       }
-       return action;
+        double action = 0;
+  
+        // Original code
+        if (angle > 0) {
+            if (angle > 65 * 0.01745) {
+                action = 10;
+            } else if (angle > 60 * 0.01745) {
+                action = 8;
+            } else if (angle > 50 * 0.01745) {
+                action = 7.5;
+            } else if (angle > 30 * 0.01745) {
+                action = 4;
+            } else if (angle > 20 * 0.01745) {
+                action = 2;
+            } else if (angle > 10 * 0.01745) {
+                action = 0.5;
+            } else if(angle >5*0.01745){
+                action = 0.2;
+            } else if(angle >2*0.01745){
+                action = 0.1;
+            } else {
+                action = 0;
+            }
+        } else if (angle < 0) {
+            if (angle < -65 * 0.01745) {
+                action = -10;
+            } else if (angle < -60 * 0.01745) {
+                action = -8;
+            } else if (angle < -50 * 0.01745) {
+                action = -7.5;
+            } else if (angle < -30 * 0.01745) {
+                action = -4;
+            } else if (angle < -20 * 0.01745) {
+                action = -2;
+            } else if (angle < -10 * 0.01745) {
+                action = -0.5;
+            } else if(angle <-5*0.01745){
+                action = -0.2;
+            } else if(angle <-2*0.01745){
+                action = -0.1;
+            } else {
+                action = 0;
+            }
+        } else {
+            action = 0.;
+        }
+
+        PIDController anglePID = new PIDController();
+        anglePID.PID_init(0.8, 0.2, 0.3, 0.2, 0.4);
+        double actionPID = anglePID.PID_update(angle, angleDot, 0);
+        System.out.println("PID action: " + actionPID);
+        System.out.println("Actual action: " + action);
+
+        // if (angle > 0) {
+        //     System.out.println("Reversing action");
+        //     actionPID *= -1;
+        // }
+
+        return actionPID;
    }
 
     /**
