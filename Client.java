@@ -20,7 +20,7 @@ public class Client extends Applet {
     // Sensor sampling rate (per simulation second)
     double sensorSamplingRate = 100;
     // advance of simulation time (in second) per step
-    double tau_sim = 0.1;
+    double tau_sim = 0.01;
     private static ObjectOutputStream out;
     private static ObjectInputStream in;
     Physics physics;
