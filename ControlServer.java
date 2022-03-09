@@ -34,7 +34,7 @@ public class ControlServer {
  */
 class PoleServer_handler implements Runnable {
     // Set the number of poles
-    private static final int NUM_POLES = 1;
+    private static final int NUM_POLES = 2;
 
     static ServerSocket providerSocket;
     Socket connection = null;
@@ -98,15 +98,22 @@ class PoleServer_handler implements Runnable {
                 // controlled independently. This part needs to be changed if
                 // the control of one pendulum needs sensing data from other
                 // pendulums.
+                double other_pos = 0;
                 for (int i = 0; i < NUM_POLES; i++) {
                   angle = data[i*4+0];
                   angleDot = data[i*4+1];
                   pos = data[i*4+2];
                   posDot = data[i*4+3];
+                  if(i == 0){
+                      System.out.println("pole 0 so other pos " + data[i*4+6]);
+                      other_pos = data[i*4+6];
+                  }else{
+                      other_pos = data[i*4+2];
+                  }
 
                   System.out.println("server < pole["+i+"]: "+angle+"  "
                       +angleDot+"  "+pos+"  "+posDot);
-                  actions[i] = calculate_action_2(angle, angleDot, pos, posDot);
+                  actions[i] = calculate_action_3(angle, angleDot, pos, posDot, i, other_pos);
                 }
 
                 sendMessage_doubleArray(actions);
@@ -176,7 +183,23 @@ class PoleServer_handler implements Runnable {
 
         return actionPID;
    }
+    // TASK 3
+    double calculate_action_3(double angle, double angleDot, double pos, double posDot, double pole_num, double other_cart_pos) throws Exception{
+        double boundary = 2;
+        double actionPID = 0;
+        if(pole_num == 1){
+            actionPID = 0.075 * (angle / 0.01745) + 0.5 * angleDot + 0.085 * (pos - 3) + 0.15 * posDot;
+        }else{
+            actionPID = 0.075 * (angle / 0.01745) + 0.5 * angleDot + 0.045 * (pos - (other_cart_pos - boundary)) + 0.15 * posDot;
+        }
+         
 
+        System.out.println("PID action: " + actionPID);
+        System.out.println("Curr angle: " + angle);
+        System.out.println("Curr pos: " + pos);
+
+        return actionPID;
+   }
     /**
      * This method sends the Double message on the object output stream.
      * @throws ioException
