@@ -168,7 +168,7 @@ class PoleServer_handler implements Runnable {
     // TASK 2
     double calculate_action_2(double angle, double angleDot, double pos, double posDot) throws Exception{
         double action = 0;
-        double actionPID = 0.075 * (angle / 0.01745) + 0.5 * angleDot + 0.01 * (pos - 2) + 0.15 * posDot;
+        double actionPID = 0.075 * (angle / 0.01745) + 0.5 * angleDot + 0.05 * (pos - 2) + 0.15 * posDot;
 
         System.out.println("PID action: " + actionPID);
         System.out.println("Curr angle: " + angle);
